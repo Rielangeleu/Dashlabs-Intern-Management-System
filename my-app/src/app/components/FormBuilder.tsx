@@ -1,17 +1,22 @@
 "use client"
 
-import { useState } from "react"
+
 import { TextField, Button, Box } from "@mui/material"
 
 
-type FormField = {
+export type FormField = {
     id: string
     type: "notes" | "code" | "image"
     value: string
 }
 
-export default function FormBuilder(){
-    const [fields, setFields] = useState<FormField[]>([])
+type FormBuilderProps = {
+    fields: FormField[]
+    setFields: React.Dispatch<React.SetStateAction<FormField[]>>
+}
+
+export default function FormBuilder({fields, setFields}: FormBuilderProps){
+    //const [fields, setFields] = useState<FormField[]>([])
 
     const addField = (type: FormField["type"]) =>{
         const newField ={

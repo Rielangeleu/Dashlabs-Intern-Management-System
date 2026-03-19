@@ -3,6 +3,7 @@
 import {useState} from "react"
 import  {TextField, Button, Box} from "@mui/material"
 import FormBuilder from "./FormBuilder"
+import { json } from "stream/consumers"
 
 
 
@@ -15,7 +16,11 @@ type Endorsement ={
 
 }
 
-
+export type FormField = {
+    id: string
+    type: "notes" | "code" | "image"
+    value: string
+}
 
 
 //Fucntion to generate the Endorsement Form
@@ -30,11 +35,37 @@ export default function EndorsementForm(){
 
     })
 
-    const handleSubmit = () => {
-        console.log(endorsement)
+    const [dynamicFields, setDynamicFields] = useState<FormField[]>([])
 
-        //add mongoDB Write Here
-    }
+    const handleSubmit = async () => {
+        const endorsementData = {
+            ...endorsement,
+            dynamicFields
+        }
+
+        console.log("Submitting:", endorsementData)
+
+        try {
+            const res = await fetch("/api/save-form", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(endorsementData)
+            })
+
+            const data = await res.json()
+
+            if (data.success) {
+                alert("✅ Saved to MongoDB!")
+            } else {
+                alert("❌ Failed to save")
+            }
+        } catch (err) {
+            console.error(err)
+            alert("❌ Error submitting form")
+        }
+}
 
     return(
         <Box 
@@ -75,7 +106,10 @@ export default function EndorsementForm(){
                 
 
                 <Box>
-                    <FormBuilder></FormBuilder>
+                    <FormBuilder
+                    fields={dynamicFields}
+                    setFields={setDynamicFields}
+                    ></FormBuilder>
                 </Box>
 
                 <Button 
