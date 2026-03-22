@@ -1,0 +1,17 @@
+export default function NotificationsPage() {
+  return (
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-[#1E293B] mb-2 text-2xl font-semibold">Notifications</h2>
+          <p className="text-[#64748B] text-sm">
+            Stay updated with system notifications
+          </p>
+        </div>
+        <div className="bg-white border border-[#E5EAF2] rounded-lg shadow-sm p-12 text-center">
+          <p className="text-[#64748B]">Notifications will be displayed here</p>
+        </div>
+      </div>
+    </div>
+  );
+}

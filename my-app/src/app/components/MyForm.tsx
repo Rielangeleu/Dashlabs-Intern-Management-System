@@ -65,7 +65,7 @@ export default function EndorsementForm(){
             console.error(err)
             alert("❌ Error submitting form")
         }
-}
+    }
 
     return(
         <Box 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../styles/global.css";
+// Import the updated Figma layout component
+import FigmaLayout from "./components/Layout"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Test Form",
-  description: "This is a test form for our OJT Project",
+  title: "Endorsement System",
+  description: "This is a Endorsement System for our OJT Project",
 };
 
 export default function RootLayout({
@@ -25,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        {/* Wrap the children with the Figma layout */}
+        <FigmaLayout>
+          {children}
+        </FigmaLayout>
       </body>
     </html>
   );
