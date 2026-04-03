@@ -16,6 +16,7 @@ import {
   Ticket,
   LogOut // Added the logout icon
 } from "lucide-react";
+import NotificationBell from "@/app/components/NotificationBell"; // <-- Import the new Bell component
 
 // The menu items array
 const menuItems = [
@@ -26,7 +27,6 @@ const menuItems = [
   { path: "/shift-logs", label: "Shift Logs", icon: ClipboardList },
   { path: "/endorsement-review", label: "Endorsement Review", icon: ClipboardList },
   { path: "/task-history", label: "Task History", icon: History },
-  { path: "/notifications", label: "Notifications", icon: Bell },
   { path: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
@@ -38,6 +38,9 @@ export default function FigmaLayout({ children }: { children: React.ReactNode })
   if (pathname === "/login") {
     return <>{children}</>;
   }
+
+  // 2. Get the current user's name safely
+  const currentUserName = session?.user?.name || "";
 
   return (
     <div className="flex h-screen bg-[#F4F7FB]">
@@ -92,20 +95,21 @@ export default function FigmaLayout({ children }: { children: React.ReactNode })
             </div>
             
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-[#F4F7FB] rounded-lg transition-colors relative">
-                <Bell className="w-5 h-5 text-[#64748B]" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full" />
-              </button>
+              
+              {/* 👇 INJECTED THE LIVE NOTIFICATION BELL HERE 👇 */}
+              {status === "authenticated" && (
+                <NotificationBell currentUser={currentUserName} />
+              )}
               
               {/* Dynamic User Profile */}
               <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F4F7FB] rounded-lg border border-[#E5EAF2]">
                 <div className="w-8 h-8 rounded-full bg-[#2F6FED] flex items-center justify-center text-white font-medium text-sm">
                   {/* Show the first letter of their name, or a User icon if loading */}
-                  {status === "loading" ? <User className="w-4 h-4" /> : session?.user?.name?.charAt(0) || "U"}
+                  {status === "loading" ? <User className="w-4 h-4" /> : currentUserName.charAt(0) || "U"}
                 </div>
                 <div className="text-sm pr-2">
                   <div className="text-[#1E293B] font-medium whitespace-nowrap">
-                    {session?.user?.name || "Loading..."}
+                    {currentUserName || "Loading..."}
                   </div>
                   <div className="text-[#64748B] text-xs">
                     {/* We cast to 'any' here to access the custom role we added to the session */}
