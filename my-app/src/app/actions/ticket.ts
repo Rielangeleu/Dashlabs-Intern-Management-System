@@ -4,6 +4,7 @@ import clientPromise from "../lib/mongodb";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { logTicketHistory } from "./history"; 
+import { createNotification } from "./notification";
 
 // 1. CREATE TICKET (Audit Integrated)
 export async function createTicket(ticketData: any, performedBy: string = "System") {
@@ -202,6 +203,12 @@ export async function assignTicket(ticketId: string, solverName: string, perform
       performedBy: performedBy,
       details: `Ticket assigned to ${solverName}.`
     });
+
+    await createNotification(
+      solverName, // The person receiving the ticket
+      `You have been assigned Ticket ${ticketId} by ${performedBy}.`,
+      `/ticket/${ticketId}` // The link to the ticket
+    );
 
     revalidatePath(`/ticket/${ticketId}`);
     revalidatePath("/ticket-tracker");
