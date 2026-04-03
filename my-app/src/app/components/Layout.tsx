@@ -1,8 +1,9 @@
-"use client"; // Required for usePathname in Next.js
+"use client"; // Required for usePathname and useSession
 
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react"; // Import NextAuth hooks
 import { 
   LayoutDashboard, 
   FileText, 
@@ -12,7 +13,8 @@ import {
   Bell, 
   Settings as SettingsIcon,
   User,
-  Ticket
+  Ticket,
+  LogOut // Added the logout icon
 } from "lucide-react";
 
 // The menu items array
@@ -29,7 +31,13 @@ const menuItems = [
 ];
 
 export default function FigmaLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname(); // Next.js way to get the current URL
+  const pathname = usePathname();
+  const { data: session, status } = useSession(); // Get the active user session
+
+  // 1. Hide the entire layout if the user is on the login screen
+  if (pathname === "/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex h-screen bg-[#F4F7FB]">
@@ -37,12 +45,11 @@ export default function FigmaLayout({ children }: { children: React.ReactNode })
       <aside className="w-64 bg-[#1E293B] text-white flex flex-col">
         {/* Sidebar Logo */}
         <div className="px-6 py-5 border-b border-[#334155]">
-          {/* Ensure you put dashlabs-logo.png inside your /public folder */}
           <img src="/Dashlabs logo.png" alt="Dashlabs" className="h-8" />
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 py-6">
+        <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.path;
@@ -50,7 +57,7 @@ export default function FigmaLayout({ children }: { children: React.ReactNode })
             return (
               <Link
                 key={item.path}
-                href={item.path} // Changed from 'to' to 'href' for Next.js
+                href={item.path}
                 className={`flex items-center gap-3 px-6 py-3 transition-colors relative ${
                   isActive
                     ? "bg-[#2F6FED] text-white"
@@ -83,27 +90,45 @@ export default function FigmaLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-4">
               <h1 className="text-[#1E293B] font-semibold">Intern Endorsement System</h1>
             </div>
+            
             <div className="flex items-center gap-4">
               <button className="p-2 hover:bg-[#F4F7FB] rounded-lg transition-colors relative">
                 <Bell className="w-5 h-5 text-[#64748B]" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full" />
               </button>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F4F7FB] rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-[#2F6FED] flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+              
+              {/* Dynamic User Profile */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F4F7FB] rounded-lg border border-[#E5EAF2]">
+                <div className="w-8 h-8 rounded-full bg-[#2F6FED] flex items-center justify-center text-white font-medium text-sm">
+                  {/* Show the first letter of their name, or a User icon if loading */}
+                  {status === "loading" ? <User className="w-4 h-4" /> : session?.user?.name?.charAt(0) || "U"}
                 </div>
-                <div className="text-sm">
-                  <div className="text-[#1E293B] font-medium">Dr. Sarah Chen</div>
-                  <div className="text-[#64748B] text-xs">QA Laboratory</div>
+                <div className="text-sm pr-2">
+                  <div className="text-[#1E293B] font-medium whitespace-nowrap">
+                    {session?.user?.name || "Loading..."}
+                  </div>
+                  <div className="text-[#64748B] text-xs">
+                    {/* We cast to 'any' here to access the custom role we added to the session */}
+                    {(session?.user as any)?.role || "Intern"}
+                  </div>
                 </div>
               </div>
+
+              {/* Log Out Button */}
+              <button 
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="p-2 text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 rounded-lg transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+
             </div>
           </div>
         </header>
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto">
-          {/* Outlet replaced with Next.js children */}
           {children}
         </main>
       </div>

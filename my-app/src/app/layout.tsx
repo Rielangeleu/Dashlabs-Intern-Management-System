@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/global.css";
-// Import the updated Figma layout component
 import FigmaLayout from "./components/Layout"; 
+import AuthProvider from "./components/AuthProvider";
+import { Toaster } from "sonner"; // 1. Import the Toaster
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Endorsement System",
-  description: "This is a Endorsement System for our OJT Project",
+  description: "This is an Endorsement System for our OJT Project",
 };
 
 export default function RootLayout({
@@ -27,10 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {/* Wrap the children with the Figma layout */}
-        <FigmaLayout>
-          {children}
-        </FigmaLayout>
+        <AuthProvider>
+          <FigmaLayout>
+            {children}
+          </FigmaLayout>
+          {/* 2. Add the Toaster here so it sits on top of your whole app */}
+          <Toaster position="top-right" richColors /> 
+        </AuthProvider>
       </body>
     </html>
   );

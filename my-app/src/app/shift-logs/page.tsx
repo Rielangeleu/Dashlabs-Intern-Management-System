@@ -1,123 +1,109 @@
-import { User, Calendar, Clock } from "lucide-react";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
+import { getEndorsements } from "@/app/actions/endorsement";
+import Link from "next/link";
+import PaginationControls from "@/app/components/PaginationControls";
+import ShiftLogFilters from "@/app/components/ShiftLogFilters";
 
-const shiftLogs = [
-  {
-    id: 1,
-    intern: "Intern A",
-    date: "March 10, 2026",
-    shift: "Night Shift",
-    time: "8:00 PM - 6:00 AM",
-    summary: "Machine X calibration needed tomorrow – QA Lab",
-    tasksCompleted: 3,
-    pendingTasks: 3,
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    intern: "Intern B",
-    date: "March 9, 2026",
-    shift: "Evening Shift",
-    time: "2:00 PM - 10:00 PM",
-    summary: "Sample processing completed, inventory updated",
-    tasksCompleted: 5,
-    pendingTasks: 2,
-    status: "Confirmed",
-  },
-  {
-    id: 3,
-    intern: "Intern C",
-    date: "March 8, 2026",
-    shift: "Morning Shift",
-    time: "6:00 AM - 2:00 PM",
-    summary: "Equipment maintenance log updated, all systems operational",
-    tasksCompleted: 4,
-    pendingTasks: 1,
-    status: "Confirmed",
-  },
-  {
-    id: 4,
-    intern: "Intern A",
-    date: "March 7, 2026",
-    shift: "Night Shift",
-    time: "8:00 PM - 6:00 AM",
-    summary: "Quality control testing completed for Batch 234",
-    tasksCompleted: 6,
-    pendingTasks: 2,
-    status: "Confirmed",
-  },
-];
+export default async function ShiftLogsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // 1. Unwrap the Next.js 15 searchParams Promise
+  const resolvedSearchParams = await searchParams;
 
-export default function ShiftLogsPage() {
+  // 2. Read the resolved URL parameters
+  const page = typeof resolvedSearchParams.page === 'string' ? Number(resolvedSearchParams.page) : 1;
+  const limit = typeof resolvedSearchParams.limit === 'string' ? Number(resolvedSearchParams.limit) : 10;
+  const statusFilter = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : "active";
+  const searchId = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : "";
+
+  // 3. Fetch the data
+  const response = await getEndorsements(page, limit, statusFilter, searchId);
+  const logs = response.success ? response.logs : [];
+  const pagination = response.pagination;
+
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-6">
-          <h2 className="text-[#1E293B] mb-2 text-2xl font-semibold">Shift Logs</h2>
-          <p className="text-[#64748B] text-sm">
-            Historical record of all shift endorsements
-          </p>
+        <div className="mb-6 flex justify-between items-end">
+          <div>
+            <h2 className="text-[#1E293B] mb-2 text-2xl font-semibold">Shift Handovers</h2>
+            <p className="text-[#64748B] text-sm">
+              Review and acknowledge laboratory shift endorsements.
+            </p>
+          </div>
+          <Link 
+            href="/create-endorsement" 
+            className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium text-sm hover:bg-blue-700 transition-colors"
+          >
+            + Create Endorsement
+          </Link>
         </div>
 
-        {/* Logs List */}
-        <div className="space-y-4">
-          {shiftLogs.map((log) => (
-            <div
-              key={log.id}
-              className="bg-white border border-[#E5EAF2] rounded-lg shadow-sm overflow-hidden"
-            >
-              {/* Card Header */}
-              <div className="px-6 py-4 border-b border-[#E5EAF2] bg-[#FAFBFC] flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#E0E7FF] flex items-center justify-center">
-                    <User className="w-5 h-5 text-[#2F6FED]" />
-                  </div>
-                  <div>
-                    <h3 className="text-[#1E293B] font-medium">{log.intern}</h3>
-                    <div className="flex items-center gap-4 text-sm text-[#64748B] mt-1">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {log.date}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {log.shift} ({log.time})
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <Badge className="bg-[#DCFCE7] text-[#22C55E] hover:bg-[#DCFCE7] border-transparent">
-                  {log.status}
-                </Badge>
+        <ShiftLogFilters />
+
+        <div className="bg-white border border-[#E5EAF2] rounded-lg shadow-sm overflow-hidden flex flex-col">
+          {logs.length === 0 ? (
+            <div className="p-12 text-center">
+              <p className="text-[#64748B]">No shift logs found for this filter.</p>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto min-h-[400px]">
+                <table className="w-full text-left text-sm text-[#64748B]">
+                  <thead className="bg-gray-50 border-b border-[#E5EAF2] text-xs uppercase text-[#1E293B]">
+                    <tr>
+                      <th className="px-6 py-4 font-medium">Endorsement ID</th>
+                      <th className="px-6 py-4 font-medium">Shift Date</th>
+                      <th className="px-6 py-4 font-medium">Submitted By</th>
+                      <th className="px-6 py-4 font-medium">Status</th>
+                      <th className="px-6 py-4 font-medium text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5EAF2]">
+                    {logs.map((log: any) => (
+                      <tr key={log._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap font-medium text-[#1E293B]">
+                          {log.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {log.date} ({log.shift})
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {log.intern}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                            log.status === "Pending" 
+                              ? "bg-amber-100 text-amber-700 border-amber-200" 
+                              : "bg-green-100 text-green-700 border-green-200"
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <Link 
+                            href={`/endorsement-review/${log.id}`}
+                            className="text-blue-600 hover:text-blue-800 font-medium hover:underline"
+                          >
+                            View Details
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               
-              {/* Card Body */}
-              <div className="px-6 py-4">
-                <p className="text-sm text-[#64748B] mb-4">{log.summary}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="text-[#64748B]">
-                      <span className="font-medium text-[#1E293B]">{log.tasksCompleted}</span>{" "}
-                      tasks completed
-                    </div>
-                    <div className="text-[#64748B]">
-                      <span className="font-medium text-[#1E293B]">{log.pendingTasks}</span>{" "}
-                      pending tasks
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-[#2F6FED] hover:text-[#1D4ED8] hover:bg-[#F4F7FB]"
-                  >
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+              {pagination && (
+                <PaginationControls 
+                  currentPage={pagination.currentPage} 
+                  totalPages={pagination.totalPages} 
+                  currentLimit={pagination.limit} 
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
