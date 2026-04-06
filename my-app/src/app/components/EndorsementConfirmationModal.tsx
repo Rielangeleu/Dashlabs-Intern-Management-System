@@ -8,8 +8,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog"; // Adjusted path assuming it's in the same folder
-import { Button } from "./ui/button"; // Adjusted path assuming it's in the same folder
+} from "./ui/dialog"; // Path to dialog box
+import { Button } from "./ui/button"; 
 
 interface EndorsementConfirmationModalProps {
   open: boolean;

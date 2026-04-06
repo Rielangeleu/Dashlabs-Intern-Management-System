@@ -59,7 +59,6 @@ export async function getHistoryForTicket(ticketId: string) {
 
 //view logs
 // src/app/actions/history.ts
-
 export async function getAllTaskHistory(page: number = 1, limit: number = 15) {
   try {
     const client = await clientPromise;

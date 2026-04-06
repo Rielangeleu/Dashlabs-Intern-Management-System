@@ -1,3 +1,5 @@
+//session provider to implement account/ users profiles
+
 "use client";
 
 import { SessionProvider } from "next-auth/react";
